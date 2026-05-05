@@ -1,0 +1,90 @@
+python tutorials/getting_started/welcome_example.py
+
+uvicorn api:app --reload
+http://127.0.0.1:8000/docs
+npm run dev
+chromadb
+http://127.0.0.1:8000/debug-memory
+
+prometheus
+http://127.0.0.1:8000/metrics
+grafana
+http://localhost:3000/login admin Dheeraj@44
+
+./prometheus.exe --config.file=prometheus.yml
+http://localhost:9090
+total_requests_total
+confidence_score
+embedding_age_days
+update_trigger_flag
+
+ uvicorn backend.api:app --reload
+
+python -m pipelines.flows.ingest_flow
+prefect server start
+
+
+pulumi login --local
+pulumi stack init dev
+pulumi up    Dheeraj
+Frontend:
+→ Next.js
+
+Backend:
+→ FastAPI
+
+Model Serving:
+→ BentoML
+
+Pipeline Orchestration:
+→ Prefect
+
+Data Processing:
+→ Apache Spark
+
+Data Transformation:
+→ dbt
+
+Experiment Tracking:
+→ Weights & Biases
+
+CI/CD:
+→ Argo CD (GitOps)
+
+Observability:
+→ Arize AI
+
+Infrastructure:
+→ Pulumi (AWS)
+
+# AutoChat 🚀
+
+An AI chatbot system with:
+- Local LLM (llmware - bling-phi-3-gguf)
+- FastAPI backend
+- React frontend
+- Chroma vector DB (RAG)
+- Prometheus + Grafana observability
+- Prefect pipeline for data ingestion
+
+## Features
+- Self-learning via feedback
+- Semantic search (RAG)
+- AI observability dashboard
+- Pipeline-triggered updates
+
+## Run Backend
+cd backend
+pip install -r requirements.txt
+uvicorn api:app
+
+## Run Frontend
+cd frontend/chatbot-ui
+npm install
+npm run dev
+
+## Metrics
+http://localhost:8000/metrics
+
+## Dashboard
+Grafana → http://localhost:3000
