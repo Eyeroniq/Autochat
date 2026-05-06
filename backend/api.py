@@ -7,6 +7,11 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from prometheus_client import Counter, Histogram, Gauge, generate_latest
 from llmware.models import ModelCatalog
+import sys
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from pipelines.flows.ingest_flow import ingest_pipeline
 
 #from backend.vector_store import search_memory, add_to_memory, collection
 
@@ -24,12 +29,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load model
-model = ModelCatalog().load_model(
-    "bling-phi-3-gguf",
-    temperature=0.2,
-    sample=False
-)
+# Skip model loading during CI
+if os.getenv("CI") == "true":
+    model = None
+else:
+    model = ModelCatalog().load_model(
+        "bling-phi-3-gguf",
+        temperature=0.2,
+        sample=False
+    )
 
 # -------------------- SCHEMAS --------------------
 
@@ -222,7 +230,7 @@ def metrics():
     return Response(generate_latest(), media_type="text/plain")
 
 
-# @app.post("/run-pipeline")
-# def run_pipeline(background_tasks: BackgroundTasks):
-#     background_tasks.add_task(ingest_pipeline)
-#     return {"status": "Pipeline running in background"}
+@app.post("/run-pipeline")
+def run_pipeline(background_tasks: BackgroundTasks):
+    background_tasks.add_task(ingest_pipeline)
+    return {"status": "Pipeline running in background"}

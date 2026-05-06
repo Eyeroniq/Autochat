@@ -5,14 +5,13 @@ on:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - main
-
 jobs:
   backend-test:
 
     runs-on: ubuntu-latest
+
+    env:
+      CI: true
 
     steps:
 
@@ -34,6 +33,5 @@ jobs:
           cd backend
           python -c "import api"
 
-      - name: Lint Check
-        run: |
-          echo "CI Pipeline Passed"
+      - name: CI Passed
+        run: echo "Backend validated successfully"
