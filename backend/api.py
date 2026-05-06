@@ -8,8 +8,7 @@ from pydantic import BaseModel
 from prometheus_client import Counter, Histogram, Gauge, generate_latest
 from llmware.models import ModelCatalog
 
-from pipelines.flows.ingest_flow import ingest_pipeline
-from backend.vector_store import search_memory, add_to_memory, collection
+#from backend.vector_store import search_memory, add_to_memory, collection
 
 # -------------------- INIT --------------------
 
@@ -223,7 +222,7 @@ def metrics():
     return Response(generate_latest(), media_type="text/plain")
 
 
-@app.post("/run-pipeline")
-def run_pipeline(background_tasks: BackgroundTasks):
-    background_tasks.add_task(ingest_pipeline)
-    return {"status": "Pipeline running in background"}
+# @app.post("/run-pipeline")
+# def run_pipeline(background_tasks: BackgroundTasks):
+#     background_tasks.add_task(ingest_pipeline)
+#     return {"status": "Pipeline running in background"}
