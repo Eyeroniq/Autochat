@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+llmware
+chromadb
+sentence-transformers
+prometheus-client
+prefect
+pydantic
