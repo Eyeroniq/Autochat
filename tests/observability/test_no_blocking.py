@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import gc
 import json
 import threading
 import time
@@ -128,7 +129,13 @@ async def test_hanging_backend_does_not_lag_the_event_loop() -> None:
                     pass
             await asyncio.sleep(0)
 
-    await asyncio.gather(ticker(), producer())
+    # A full GC pass over the heap the test fixtures import (~100 ms) would
+    # stall the loop whatever tracing does; measure tracing alone.
+    gc.disable()
+    try:
+        await asyncio.gather(ticker(), producer())
+    finally:
+        gc.enable()
     hanging.release.set()
     assert worst < 0.05
 
