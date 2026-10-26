@@ -1,0 +1,78 @@
+# Low-compute profile for hosting a public demo.
+# Load it on top of settings.yaml with: AUTOCHAT_PROFILES=lite
+# Every value can still be overridden by the environment variable next to it.
+server:
+  auth:
+    enabled: true
+    # Required, no default: the server refuses to start without it.
+    # python -c 'import base64; print("Basic " + base64.b64encode("user:password".encode()).decode())'
+    secret: ${AUTOCHAT_AUTH_SECRET}
+  # Visitors chat without the secret: rate-limited, read-only guest sessions.
+  # Limits are kept in memory, which is why this profile runs one worker.
+  guest:
+    enabled: ${AUTOCHAT_GUEST_ENABLED:true}
+    messages_per_session: ${AUTOCHAT_GUEST_MESSAGES_PER_SESSION:20}
+    daily_message_limit: ${AUTOCHAT_GUEST_DAILY_MESSAGE_LIMIT:300}
+    trust_forwarded_for: ${AUTOCHAT_GUEST_TRUST_FORWARDED_FOR:false}
+  api_doc:
+    enabled: ${AUTOCHAT_SWAGGER_ENABLED:false}
+  max_workers: ${AUTOCHAT_MAX_WORKERS:1}
+
+data:
+  max_content_concurrency: ${AUTOCHAT_MAX_CONTENT_CONCURRENCY:1}
+
+# Fewer, smaller chunks per prompt: the biggest latency and token-cost saving.
+retrieval:
+  top_k: ${AUTOCHAT_RETRIEVAL_TOP_K:8}
+  maximize_top_k: ${AUTOCHAT_MAXIMIZE_TOP_K:false}
+
+# No server-side switch for reasoning works today (allow_use_reasoning is ignored):
+# pick a non-reasoning model, or leave `thinking` off in requests.
+chat:
+  assistant_name: ${AUTOCHAT_ASSISTANT_NAME:AutoChat}
+  max_iterations: ${AUTOCHAT_CHAT_MAX_ITERATIONS:10}
+  maximum_context_length: ${AUTOCHAT_MAXIMUM_CONTEXT_LENGTH:8192}
+
+# Latency and token usage per chat request, shown on the Usage screen.
+usage:
+  enabled: ${AUTOCHAT_USAGE_ENABLED:true}
+
+# Must match the embedding model: nomic-embed-text = 768, all-minilm = 384, mxbai-embed-large = 1024.
+vectorstore:
+  embed_dim: ${AUTOCHAT_EMBED_DIM:768}
+
+# OCR is the slowest part of ingestion; text-based PDFs don't need it.
+docling:
+  use_ocr: ${AUTOCHAT_DOCLING_USE_OCR:false}
+  num_threads: ${AUTOCHAT_DOCLING_NUM_WORKERS:1}
+
+# A public demo should not run arbitrary code inside the container.
+# An empty provider turns the sandbox off; the tool flags are a second guard.
+code_execution:
+  provider: ${AUTOCHAT_CODE_EXECUTION_PROVIDER:}
+  tools:
+    bash:
+      enabled: false
+    text_editor:
+      enabled: false
+    present_files:
+      enabled: false
+    present_server:
+      enabled: false
+    convert_documents:
+      enabled: false
+
+web_fetch:
+  enabled: false
+
+web_search:
+  enabled: false
+
+# Gateways such as OpenRouter list hundreds of models. To expose only one, set
+# AUTOCHAT_LLM_AUTO_DISCOVER_MODELS=false and AUTOCHAT_LLM_DEFAULT to the name below, then uncomment:
+# models:
+#   - name: meta-llama/llama-3.3-70b-instruct
+#     type: llm
+#     mode: openai
+#     context_window: 32768
+#     support_tools: true

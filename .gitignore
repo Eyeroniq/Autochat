@@ -1,0 +1,30 @@
+# Secrets
+.env
+.env.*
+!.env.lite.example
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+coverage.xml
+htmlcov/
+tests-results.xml
+
+# Local data, model caches and build output
+/local_data/
+/models/
+/tiktoken_cache/
+/encodings/
+/.local-browsers/
+/.cache/
+/dist/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
