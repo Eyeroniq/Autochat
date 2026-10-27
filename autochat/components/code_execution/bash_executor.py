@@ -36,6 +36,32 @@ def _child_setup(cpu_s: int, mem_mb: int, fsize_mb: int, nproc: int) -> None:
     _set(r.RLIMIT_NPROC, (nproc, nproc))
 
 
+_SERVER_ENV_PREFIXES = ("AUTOCHAT_", "OPENAI_")
+_SECRET_ENV_MARKERS = (
+    "KEY",
+    "SECRET",
+    "TOKEN",
+    "PASSWORD",
+    "PASSWD",
+    "CREDENTIAL",
+    "AUTH",
+)
+
+
+def _child_env() -> dict[str, str]:
+    """The server's environment minus its configuration and credentials.
+
+    Model-written commands must not be able to read the API keys or the owner
+    secret (a prompt-injected document could ask the model to print them).
+    """
+    return {
+        name: value
+        for name, value in os.environ.items()
+        if not name.upper().startswith(_SERVER_ENV_PREFIXES)
+        and not any(marker in name.upper() for marker in _SECRET_ENV_MARKERS)
+    }
+
+
 def _cap_bytes(data: bytes, limit: int) -> str:
     if len(data) > limit:
         truncated = data[:limit]
@@ -90,6 +116,7 @@ class LocalBashExecutor:
             stdout=PIPE,
             stderr=PIPE,
             cwd=str(cwd),
+            env=_child_env(),
             preexec_fn=preexec,
         )
         try:
