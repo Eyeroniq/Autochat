@@ -8654,7 +8654,17 @@
     if (!state.chats.length) createChat();
     else render();
     // Guest credentials must exist before the first authenticated fetch.
-    startGuestSessionIfAvailable().finally(() => refreshSkills({ showToast: false }));
+    startGuestSessionIfAvailable().finally(async () => {
+      refreshSkills({ showToast: false });
+      // The saved document list goes stale when documents are added elsewhere
+      // (by the owner, for a returning guest); new chats only enable Documents
+      // when it is non-empty.
+      if (createBasicAuthHeader(state.autochatUsername, state.autochatPassword) || activeGuestSession()) {
+        await refreshDocuments({ showToast: false });
+        normalizeChatContextSelections();
+        render();
+      }
+    });
   </script>
 </body>
 </html>

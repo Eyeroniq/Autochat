@@ -119,7 +119,13 @@ class ModelsService:
             raise ValueError("Only one of before_id or after_id can be provided")
 
         all_models = list(self.llm_component.llm_models.values())
-        all_models.sort(key=lambda model: model.name)
+        # Default model first: clients (the bundled UI included) pick the first
+        # listed model, which would otherwise be whichever sorts first.
+        try:
+            default_name = self.llm_component.get_config().name
+        except ValueError:
+            default_name = None
+        all_models.sort(key=lambda model: (model.name != default_name, model.name))
         model_ids = [model.name for model in all_models]
 
         if after_id:

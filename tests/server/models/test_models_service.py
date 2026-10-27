@@ -11,7 +11,8 @@ class _FakeLLMComponent:
         self.llm_models = models
         self.default_model_id = default_model_id
 
-    def get_config(self, model_id: str | None) -> LLMModelConfig:
+    def get_config(self, model_id: str | None = None) -> LLMModelConfig:
+        model_id = model_id or self.default_model_id
         if model_id is None or model_id not in self.llm_models:
             raise ValueError(f"Unknown model: {model_id}")
         return self.llm_models[model_id]
@@ -91,3 +92,27 @@ def test_global_reasoning_disable_overrides_model_support() -> None:
     assert model_info.capabilities.thinking.supported is False
     assert model_info.capabilities.thinking.types.enabled.supported is False
     assert model_info.capabilities.thinking.types.adaptive.supported is False
+
+
+def test_list_models_puts_default_model_first() -> None:
+    models = {
+        name: _make_model(name, support_reasoning=None, support_image=None)
+        for name in ("a-small-model", "z-default-model", "m-model")
+    }
+    settings = SimpleNamespace(
+        chat=SimpleNamespace(allow_reasoning=True, allow_generate_citations=False),
+        sandbox=SimpleNamespace(enabled=True),
+    )
+    service = ModelsService(
+        llm_component=_FakeLLMComponent(models, default_model_id="z-default-model"),
+        settings=settings,
+    )
+
+    listed = service.list_models(before_id=None, after_id=None, limit=10)
+
+    assert [model.id for model in listed.data] == [
+        "z-default-model",
+        "a-small-model",
+        "m-model",
+    ]
+    assert listed.first_id == "z-default-model"

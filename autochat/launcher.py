@@ -260,16 +260,19 @@ def create_app(root_injector: Injector) -> FastAPI:
                 root_path = request.scope.get("root_path", "").rstrip("/")
                 return RedirectResponse(url=f"{root_path}{ui_path}/", status_code=307)
 
-        connect_host = (
-            "127.0.0.1" if settings.server.host == "0.0.0.0" else settings.server.host
+        # The UI is served by this server, so its API is the page's own origin
+        # (whatever host, port or domain the browser used), plus root_path.
+        # A server-side host:port such as 127.0.0.1:8080 would point visitors'
+        # browsers at their own machine.
+        root_path = (
+            "/" + settings.server.root_path.strip("/")
+            if settings.server.root_path
+            else ""
         )
-        server_url = f"http://{connect_host}:{settings.server.port}"
-        if settings.server.root_path:
-            server_url += "/" + settings.server.root_path.strip("/")
         _index_html = (UI_DIRECTORY / "index.html").read_text(encoding="utf-8")
         _index_html = _index_html.replace(
             'const DEFAULT_BASE_URL = window.location.origin === "null" ? "http://127.0.0.1:8080" : window.location.origin;',
-            f'const DEFAULT_BASE_URL = "{server_url}";',
+            f'const DEFAULT_BASE_URL = window.location.origin + "{root_path}";',
         )
 
         @app.get(f"{ui_path}/", include_in_schema=False)
