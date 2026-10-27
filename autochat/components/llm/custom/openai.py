@@ -143,11 +143,16 @@ class PatchedOpenAILLM(StructuredChatMixin, OpenAIBase):  # type: ignore[misc]
                         )
                 msg.additional_kwargs["tool_calls"] = openai_tool_calls
 
+            # Reasoning kept in history is not an OpenAI message field; strict
+            # servers (Groq) reject the whole request when it is sent back.
+            additional_kwargs = {
+                k: v for k, v in msg.additional_kwargs.items() if k != "thinking"
+            }
             normalized.append(
                 ChatMessage(
                     role=msg.role,
                     blocks=blocks,
-                    additional_kwargs=msg.additional_kwargs,
+                    additional_kwargs=additional_kwargs,
                 )
             )
         return normalized
@@ -300,6 +305,14 @@ class PatchedOpenAILLM(StructuredChatMixin, OpenAIBase):  # type: ignore[misc]
                 all_kwargs.pop("reasoning_effort", None)
         elif "reasoning_effort" not in all_kwargs:
             all_kwargs["reasoning_effort"] = "none"
+        # gpt-oss always reasons and its servers (Groq, vLLM...) reject "none";
+        # "low" is the closest it gets to off.
+        if (
+            not is_real_openai
+            and "gpt-oss" in self.model
+            and all_kwargs.get("reasoning_effort") == "none"
+        ):
+            all_kwargs["reasoning_effort"] = "low"
 
         # Convert StructuredOutputsParams to OpenAI response_format.
         structured_outputs = all_kwargs.pop("structured_outputs", None)
