@@ -1,4 +1,5 @@
 from llama_index.core.base.llms.types import ChatMessage, MessageRole
+from llama_index.core.llms.llm import ToolSelection
 
 from autochat.components.llm.custom.openailike import PatchedOpenAILikeLLM
 from autochat.components.llm.models import ReasoningEffort
@@ -37,6 +38,22 @@ def test_thinking_is_not_sent_back_but_stays_in_history() -> None:
     assert "thinking" not in sent.additional_kwargs
     assert sent.additional_kwargs["foo"] == "bar"
     assert message.additional_kwargs["thinking"] == "Let me search."
+
+
+def test_tool_calls_are_converted_without_mutating_history() -> None:
+    selection = ToolSelection(
+        tool_id="call_1", tool_name="load_skill", tool_kwargs={"name": "x"}
+    )
+    message = ChatMessage(
+        role=MessageRole.ASSISTANT,
+        content="",
+        additional_kwargs={"tool_calls": [selection]},
+    )
+    (sent,) = _llm("openai/gpt-oss-120b")._normalize_chat_messages([message])
+
+    assert sent.additional_kwargs["tool_calls"][0].function.name == "load_skill"
+    # History keeps ToolSelection: later iterations drop calls in other formats.
+    assert message.additional_kwargs["tool_calls"] == [selection]
 
 
 def test_no_null_tool_fields_without_tools() -> None:

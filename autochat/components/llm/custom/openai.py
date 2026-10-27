@@ -117,7 +117,15 @@ class PatchedOpenAILLM(StructuredChatMixin, OpenAIBase):  # type: ignore[misc]
             # OpenAI expects to have content even when it's None
             blocks = msg.blocks if msg.blocks else [TextBlock(text="")]
 
-            # The tool_uses has to be in OpenAI format
+            # Reasoning kept in history is not an OpenAI message field; strict
+            # servers (Groq) reject the whole request when it is sent back.
+            additional_kwargs = {
+                k: v for k, v in msg.additional_kwargs.items() if k != "thinking"
+            }
+
+            # The tool_uses has to be in OpenAI format. Convert on the copy:
+            # the history must keep ToolSelection objects, or later iterations
+            # (EnsureToolAreFlattenInterceptor) drop the earlier tool calls.
             tool_calls = msg.additional_kwargs.get("tool_calls", [])
             if tool_calls:
                 from openai.types.chat.chat_completion_chunk import (  # ty:ignore[unresolved-import]
@@ -141,13 +149,8 @@ class PatchedOpenAILLM(StructuredChatMixin, OpenAIBase):  # type: ignore[misc]
                                 ),
                             )
                         )
-                msg.additional_kwargs["tool_calls"] = openai_tool_calls
+                additional_kwargs["tool_calls"] = openai_tool_calls
 
-            # Reasoning kept in history is not an OpenAI message field; strict
-            # servers (Groq) reject the whole request when it is sent back.
-            additional_kwargs = {
-                k: v for k, v in msg.additional_kwargs.items() if k != "thinking"
-            }
             normalized.append(
                 ChatMessage(
                     role=msg.role,
