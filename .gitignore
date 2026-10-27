@@ -24,6 +24,9 @@ tests-results.xml
 /.cache/
 /dist/
 
+# Local run guide (kept out of the repo)
+/GUIDE.md
+
 # Editors and OS
 .vscode/
 .idea/
