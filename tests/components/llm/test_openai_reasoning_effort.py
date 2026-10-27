@@ -39,6 +39,15 @@ def test_thinking_is_not_sent_back_but_stays_in_history() -> None:
     assert message.additional_kwargs["thinking"] == "Let me search."
 
 
+def test_no_null_tool_fields_without_tools() -> None:
+    message = ChatMessage(role=MessageRole.USER, content="hi")
+    prepared = _llm("openai/gpt-oss-120b")._prepare_chat_with_tools(
+        [], chat_history=[message]
+    )
+    assert "tools" not in prepared
+    assert "tool_choice" not in prepared
+
+
 def test_other_models_still_disable_reasoning_with_none() -> None:
     kwargs = _llm("qwen/qwen3.8-27b")._get_model_kwargs(
         reasoning_effort=ReasoningEffort.NONE

@@ -278,6 +278,16 @@ class PatchedOpenAILLM(StructuredChatMixin, OpenAIBase):  # type: ignore[misc]
 
         return coro()
 
+    def _prepare_chat_with_tools(self, *args: Any, **kwargs: Any) -> dict[str, Any]:
+        prepared = super()._prepare_chat_with_tools(*args, **kwargs)
+        # Without tools the parent sends "tools": null, "tool_choice": null;
+        # strict servers (Groq) reject null tool_choice, so leave both out.
+        if not prepared.get("tools"):
+            prepared.pop("tools", None)
+            if prepared.get("tool_choice") is None:
+                prepared.pop("tool_choice", None)
+        return prepared
+
     def _get_model_kwargs(self, **kwargs: Any) -> dict[str, Any]:
         from autochat.components.llm.custom.base import SamplingParameters
 

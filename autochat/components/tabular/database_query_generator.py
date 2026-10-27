@@ -109,6 +109,9 @@ class ErrorType(enum.StrEnum):
 # Sentinel markers the LLM can reply with instead of a SQL query.
 NO_QUERY_SENTINEL = "NO_QUERY"
 CONTEXT_ANSWER_TAG = "CONTEXT_ANSWER"
+# A query (plus any reasoning) is short. Asking for the whole context window
+# exceeds providers' output caps and free-tier per-minute token budgets.
+SQL_MAX_OUTPUT_TOKENS = 4096
 
 
 class QueryResultType(enum.StrEnum):
@@ -976,7 +979,7 @@ class DatabaseQueryGenerator:
             #  need to implement a especially TLDR for schema
             raise ValueError("The database schema is too long to fit in the model.")
         if available_tokens > 0:
-            sampling_params["max_tokens"] = available_tokens
+            sampling_params["max_tokens"] = min(available_tokens, SQL_MAX_OUTPUT_TOKENS)
 
         response = await chat_service.chat(
             ResolvedChatRequest(
