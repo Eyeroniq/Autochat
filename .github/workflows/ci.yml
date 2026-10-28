@@ -33,7 +33,14 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: uv sync $UV_SYNC_ARGS
+        run: |
+          uv sync $UV_SYNC_ARGS
+          # The audio-splitting tests need pydub and noisereduce from the
+          # media-audio extra, but not its PyTorch: install just those two,
+          # at their locked versions.
+          uv export --frozen --extra media-audio --no-hashes \
+            | grep -E '^(pydub|noisereduce)==' > audio-requirements.txt
+          uv pip install -r audio-requirements.txt
 
       - name: Lint
         run: |
