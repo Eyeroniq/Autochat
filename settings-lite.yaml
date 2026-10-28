@@ -47,8 +47,8 @@ docling:
   num_threads: ${AUTOCHAT_DOCLING_NUM_WORKERS:1}
 
 # A public demo should not run arbitrary code inside the container, so code
-# execution and web access are off unless .env turns them on. Guests can never
-# use them (see server/guest/guest_policy.py); only the owner can.
+# execution is off unless .env turns it on. Guests can never use it (see
+# server/guest/guest_policy.py); only the owner can.
 # An empty provider turns the sandbox off; the tool flags are a second guard.
 # To enable code execution: AUTOCHAT_CODE_EXECUTION_PROVIDER=local plus the
 # AUTOCHAT_CODE_EXECUTION_TOOLS_*_ENABLED flags below.
@@ -66,14 +66,12 @@ code_execution:
     convert_documents:
       enabled: false
 
-# Reads a web page the model asks for (headless Chromium inside the image).
+# Web access is not part of this deployment (the UI has no Web option).
 web_fetch:
-  enabled: ${AUTOCHAT_WEBFETCH_ENABLED:false}
+  enabled: false
 
-# Needs a search provider: AUTOCHAT_WEBSEARCH_PROVIDER=brave and
-# AUTOCHAT_BRAVE_API_KEY (a Brave Search API key).
 web_search:
-  enabled: ${AUTOCHAT_WEBSEARCH_ENABLED:false}
+  enabled: false
 
 # Gateways such as OpenRouter list hundreds of models. To expose only one, set
 # AUTOCHAT_LLM_AUTO_DISCOVER_MODELS=false and AUTOCHAT_LLM_DEFAULT to the name below, then uncomment:

@@ -3745,24 +3745,6 @@
               <div class="source-list" id="databasesList"></div>
             </section>
 
-            <section class="context-panel" data-context-panel="web">
-              <div class="panel-head">
-                <div>
-                  <h2>Web</h2>
-                  <p class="subtle">Use web search and fetch tools when the AutoChat backend has them configured.</p>
-                </div>
-              </div>
-              <div class="settings-card">
-                <div>
-                  <h3>Backend configuration</h3>
-                  <p class="subtle">Workbench does not store web provider credentials.</p>
-                </div>
-                <div>
-                  <p class="subtle">Configure the web search provider and API key in AutoChat's backend config. From the UI, enable Web in a chat's Tools menu to include the `web_search` and `web_fetch` tools in that request.</p>
-                </div>
-              </div>
-            </section>
-
             <section class="context-panel" data-context-panel="mcp">
               <div class="panel-head">
                 <div>
@@ -3976,7 +3958,6 @@
                   </div>
                   <div class="feature-grid">
                     <label class="toggle-row"><span>Databases</span><input id="appearanceFeatureDatabases" type="checkbox" /></label>
-                    <label class="toggle-row"><span>Web</span><input id="appearanceFeatureWeb" type="checkbox" /></label>
                     <label class="toggle-row"><span>MCP</span><input id="appearanceFeatureMcp" type="checkbox" /></label>
                     <label class="toggle-row"><span>Skills</span><input id="appearanceFeatureSkills" type="checkbox" /></label>
                     <label class="toggle-row"><span>Custom Tools</span><input id="appearanceFeatureCustomTools" type="checkbox" /></label>
@@ -4197,7 +4178,6 @@
                   </div>
                   <div class="feature-grid">
                     <label class="toggle-row"><span>Databases</span><input id="onboardingFeatureDatabases" type="checkbox" /></label>
-                    <label class="toggle-row"><span>Web</span><input id="onboardingFeatureWeb" type="checkbox" /></label>
                     <label class="toggle-row"><span>MCP</span><input id="onboardingFeatureMcp" type="checkbox" /></label>
                     <label class="toggle-row"><span>Skills</span><input id="onboardingFeatureSkills" type="checkbox" /></label>
                     <label class="toggle-row"><span>Custom Tools</span><input id="onboardingFeatureCustomTools" type="checkbox" /></label>
@@ -4270,7 +4250,6 @@
       },
       features: {
         databases: true,
-        web: true,
         mcp: true,
         skills: true,
         customTools: true,
@@ -4515,7 +4494,6 @@
         background: `${prefix}BackgroundColor`,
         features: {
           databases: `${prefix}FeatureDatabases`,
-          web: `${prefix}FeatureWeb`,
           mcp: `${prefix}FeatureMcp`,
           skills: `${prefix}FeatureSkills`,
           customTools: `${prefix}FeatureCustomTools`,
@@ -4760,7 +4738,6 @@
       return {
         enabledDocuments: true,
         enabledDatabases: [],
-        enabledWeb: false,
         enabledTabular: false,
         enabledCodeExecution: false,
         enabledMcpServers: [],
@@ -4849,7 +4826,7 @@
       });
     }
 
-    const CONTEXT_TAB_IDS = new Set(["documents", "databases", "web", "mcp", "skills", "customTools", "codeExecution"]);
+    const CONTEXT_TAB_IDS = new Set(["documents", "databases", "mcp", "skills", "customTools", "codeExecution"]);
 
     function syncHash() {
       let hash;
@@ -5007,7 +4984,6 @@
       return [
         ["documents", "Documents", "file"],
         ...(featureEnabled("databases") ? [["databases", "Databases", "database"]] : []),
-        ...(featureEnabled("web") ? [["web", "Web", "globe"]] : []),
         ...(featureEnabled("mcp") ? [["mcp", "MCP", "layers"]] : []),
         ...(featureEnabled("skills") ? [["skills", "Skills", "zap"]] : []),
         ...(featureEnabled("customTools") ? [["customTools", "Custom Tools", "sliders"]] : []),
@@ -5077,7 +5053,7 @@
         '  "welcomeSubtitle": "string",',
         '  "customInstructions": "string",',
         '  "palette": { "accent": "#RRGGBB", "secondary": "#RRGGBB", "surface": "#RRGGBB", "background": "#RRGGBB" },',
-        '  "features": { "databases": true, "web": true, "mcp": true, "skills": true, "customTools": true, "apiDebugger": true, "productionNotice": true }',
+        '  "features": { "databases": true, "mcp": true, "skills": true, "customTools": true, "apiDebugger": true, "productionNotice": true }',
         "}",
         "The brand name should be short.",
         "The welcome title should be concise.",
@@ -5641,11 +5617,6 @@
           chat.settings.enabledTabular = checked; touchChat(chat); saveState();
         }, !hasDocs)
       ];
-      if (featureEnabled("web")) {
-        knowledgeRows.push(toggleRow("Web", Boolean(chat.settings.enabledWeb), checked => {
-          chat.settings.enabledWeb = checked; touchChat(chat); saveState();
-        }));
-      }
       menu.appendChild(menuGroup("Knowledge", knowledgeRows));
       if (state.enableCodeExecution !== false) {
         menu.appendChild(menuGroup("Code", [
@@ -7689,10 +7660,6 @@
       const guestOnly = Boolean(activeGuestSession()) && !createBasicAuthHeader(state.autochatUsername, state.autochatPassword);
       if (chat.settings.enabledCodeExecution && !guestOnly) {
         tools.push({ name: "code_execution", type: "code_execution_v1" });
-      }
-      if (featureEnabled("web") && chat.settings.enabledWeb && !guestOnly) {
-        tools.push({ name: "web_search", type: "web_search_v1" });
-        tools.push({ name: "web_fetch", type: "web_fetch_v1" });
       }
       if (featureEnabled("databases") && !guestOnly) {
         selectedItems(state.context.databases, chat.settings.enabledDatabases).forEach(db => {

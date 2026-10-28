@@ -62,7 +62,8 @@ The lite profile:
 
 - retrieves 8 chunks per question instead of 32 and caps context at 8k tokens;
 - limits agent loops to 10 steps;
-- turns off OCR, code execution and web tools;
+- turns off OCR and web tools (the UI has no Web option);
+- keeps code execution off unless the owner enables it in `.env`;
 - enables guest mode and usage tracking.
 
 ### Guest demo mode

@@ -478,7 +478,6 @@ Sections:
 ```text
 Documents
 Databases
-Web
 MCP
 Skills
 Custom Tools
@@ -605,18 +604,9 @@ When selected in chat, convert database configs into `tool_context` artifacts:
 }
 ```
 
-### Web
+### Web (removed)
 
-Purpose: explain web capabilities and let chat-level Tools decide whether to use them.
-
-Do not collect web provider names, API keys, or extra web configuration in Workbench.
-
-The current OpenAPI exposes:
-
-- `POST /v1/tools/web-search`
-- `POST /v1/tools/web-fetch`
-
-The web search provider and its credentials belong in AutoChat backend config. In Workbench, show static explanatory text in Context > Web and let the chat Tools menu decide whether `web_search` and `web_extract` are included in a chat request. The direct diagnostic endpoint may still be named `/v1/tools/web-fetch`; for `/v1/messages`, use the chat tool spec `{ "name": "web_extract", "type": "web_extract_v1" }`.
+The Web context tab and the Web tool toggle were removed. Web search and fetch are off in the hosted profile, so the UI never sends `web_search` or `web_fetch` tools.
 
 ### MCP
 
@@ -751,7 +741,6 @@ Header controls (in the composer toolbar below the textarea):
 - The selected effort is stored per chat and sent to the messages API as `thinking: { enabled: Boolean(effort), type: effort }`. Unsupported effort choices are disabled using the selected model's `capabilities.effort` metadata.
 - Tools button — opens the Tools menu popup with per-category toggles:
   - Documents
-  - Web
   - Databases
   - MCP
   - Skills

@@ -201,7 +201,7 @@ The lite deployment uses neither `arq` nor `celery`: everything runs in one proc
 
 | File | Purpose |
 |---|---|
-| `index.html` | The entire UI in one file (HTML, CSS, JavaScript; no build step). Screens: Chat, Context (documents, databases, web, MCP, skills, custom tools), API Debugger, Usage, Settings, onboarding. Graphite-and-mint theme, guest-mode bootstrap, Google Sheet import |
+| `index.html` | The entire UI in one file (HTML, CSS, JavaScript; no build step). Screens: Chat, Context (documents, databases, MCP, skills, custom tools), API Debugger, Usage, Settings, onboarding. Graphite-and-mint theme, guest-mode bootstrap, Google Sheet import |
 | `README.md` | How the UI folder is organised |
 | `docs/PRD.md` | Product requirements: behaviour of every screen, persisted state, API usage |
 | `docs/STYLE_GUIDE.md` | Visual rules: colours, typography, components, the Usage chart |
@@ -362,6 +362,7 @@ The UI is at `http://localhost:8080/ui` (or `https://<DOMAIN>/ui`).
 | Max agent iterations | 100 | 10 |
 | Max context length | model limit | 8,192 tokens |
 | OCR on ingestion | on | off |
-| Code execution, web search, web fetch | available | off |
+| Code execution | available | off; the owner can enable it in `.env` |
+| Web search, web fetch | available | off; not offered in the UI |
 | API docs at `/docs` | on | off |
 | Server workers | auto | 1 (required for in-memory guest limits) |
