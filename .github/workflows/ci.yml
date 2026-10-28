@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      # Every extra except media-* (PyTorch and its GPU libraries are several GB
+      # and only the optional image/audio/video readers use them).
+      UV_SYNC_ARGS: >-
+        --frozen --all-extras
+        --no-extra media --no-extra media-core --no-extra media-image
+        --no-extra media-audio --no-extra media-video
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system packages
+        # pydub needs ffmpeg to split audio in the transcription tests.
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync $UV_SYNC_ARGS
+
+      - name: Lint
+        run: |
+          uv run --no-sync ruff check autochat tests scripts
+          uv run --no-sync ruff format --check .
+
+      - name: Test
+        run: |
+          mkdir -p local_data/tests
+          AUTOCHAT_HOME=$PWD PYTHONPATH=. uv run --no-sync pytest tests -q -p no:cacheprovider
