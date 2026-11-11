@@ -657,6 +657,14 @@ class ChatSettings(BaseModel):
         None,
         description="The maximum context length tokens that it can be used for the chat engine in context mode.",
     )
+    max_output_tokens: int | None = Field(
+        None,
+        description=(
+            "Largest `max_tokens` a chat request may ask for; larger requests are "
+            "capped (0 or None: no cap). Some providers, such as Groq's free tier, "
+            "count the requested max_tokens against a per-request token limit."
+        ),
+    )
     assistant_name: str = Field("AutoChat", description="The assistant name")
     assistant_description: str = Field(
         "AutoChat", description="The assistant description"

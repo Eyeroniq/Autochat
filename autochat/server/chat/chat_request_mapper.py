@@ -142,7 +142,10 @@ class ChatRequestMapper:
         if request.frequency_penalty is not None:
             sampling_params["frequency_penalty"] = request.frequency_penalty
         if request.max_tokens is not None:
-            sampling_params["max_tokens"] = request.max_tokens
+            cap = self._settings.chat.max_output_tokens
+            sampling_params["max_tokens"] = (
+                min(request.max_tokens, cap) if cap else request.max_tokens
+            )
 
         return sampling_params
 

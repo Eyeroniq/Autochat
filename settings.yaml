@@ -99,6 +99,7 @@ chat:
   condense_strategy: ${AUTOCHAT_CONDENSE_CHAT_HISTORY:condenser}
   format_context_strategy: ${AUTOCHAT_FORMAT_CONTEXT:list}
   maximum_context_length: ${AUTOCHAT_MAXIMUM_CONTEXT_LENGTH:0}
+  max_output_tokens: ${AUTOCHAT_MAX_OUTPUT_TOKENS:0}
   assistant_name: ${AUTOCHAT_ASSISTANT_NAME:AutoChat}
   assistant_description: ${AUTOCHAT_ASSISTANT_DESCRIPTION:}
   maximum_history_length: ${AUTOCHAT_MAXIMUM_HISTORY_LENGTH:0}
