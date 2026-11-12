@@ -234,7 +234,6 @@ Sidebar
   API Debugger
   Settings
   GitHub
-  Not for Production
 
 Main
   If first launch or onboarding restarted:
@@ -294,8 +293,7 @@ Store in `localStorage`:
       skills: boolean,
       customTools: boolean,
       apiDebugger: boolean,
-      github: boolean,
-      productionNotice: boolean
+      github: boolean
     }
   },
   onboarding: {
@@ -393,9 +391,6 @@ Sidebar items:
    - Opens AutoChat API connection settings.
    - Place this in the bottom sidebar group below Usage.
 
-7. **Not for Production**
-   - Opens a modal explaining that this UI is a local demonstrator, not a production-ready application.
-   - Place this below Settings.
 
 No projects or grouping.
 
@@ -450,24 +445,14 @@ Step 2 requirements:
 - Must write into persistent appearance variables that override the runtime UI state and CSS custom properties.
 - Must remain editable later from Settings or by rerunning onboarding.
 
-## Not For Production Disclosure
+## Security Notes
 
-The sidebar should include a persistent **Not for Production** disclosure below Settings.
+The sidebar no longer shows a "Not for Production" disclosure; these caveats still apply to anyone deploying the Workbench:
 
-Clicking it opens a closable glass-style modal titled:
-
-```text
-This demonstrator is not intended for Production use
-```
-
-The modal should explain that Workbench is useful for trying API capabilities, debugging requests, and exploring local AI workflows, but should not be published as a production application.
-
-The disclosure should cover four concise risks:
-
-- Browser storage is not secure secret storage. The bearer token, chats, context configuration, and settings are saved in `localStorage`.
-- There is no application-level access control. Anyone with access to the page can use the configured API endpoint, token, tools, documents, and model access.
-- Debugging data is intentionally visible. API Debugger can show prompts, document excerpts, headers, metadata, requests, and responses.
-- Custom tools run browser JavaScript. Only trusted code should be used, and the UI should not be exposed without a reviewed deployment model.
+- Browser storage is not secure secret storage. Credentials, chats, context configuration and settings are saved in `localStorage`.
+- Anyone who can open the page as owner can use the configured endpoint, tools, documents and models; the server's owner secret and guest limits are the access control.
+- API Debugger shows prompts, document excerpts, headers and responses, so avoid screen-sharing it with sensitive data.
+- Custom tools run browser JavaScript; only use trusted code.
 
 ## Context Screen
 
@@ -992,7 +977,7 @@ Streaming/async endpoints can be deferred:
 19. No backend storage is introduced for the UI.
 20. App works as a static file.
 21. The implementation references the repository's relative OpenAPI file as the API contract and does not hardcode payload assumptions that contradict the schema.
-22. Sidebar includes a GitHub repository widget and a Not for Production disclosure.
+22. Sidebar includes a GitHub repository widget.
 23. Settings includes a Clear local data action for this Workbench's browser state.
 
 ## Suggested Build Order

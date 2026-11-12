@@ -39,7 +39,6 @@ Sidebar
   Usage
   Settings
   GitHub
-  Not for Production
 
 Main
   Context screen
@@ -111,7 +110,6 @@ API Debugger
 Usage
 Settings
 GitHub
-Not for Production
 ```
 
 Requirements:
@@ -123,7 +121,6 @@ Requirements:
 - No projects, folders, or chat grouping.
 - Place API Debugger, then Usage, then Settings at the bottom of the sidebar.
 - In guest mode, show a small mono pill under the wordmark (`.guest-badge`, accent border and tint) with messages left and the expiry time.
-- Place the Not for Production disclosure below Settings.
 - Avoid making the sidebar feel like an enterprise admin menu.
 - The chat list fills all available vertical space between the nav buttons and the bottom group, using `flex: 1 1 0` and `min-height: 0`.
 - Apply scroll-aware top/bottom fade masks to the chat list using CSS `mask-image` with `--fade-top-stop`/`--fade-bot-stop` custom properties, updated on scroll.
@@ -296,24 +293,6 @@ API Debugger should show:
 API Debugger events must not persist across page reloads.
 
 Both the timeline panel and the detail panel must have `min-width: 0` so long URLs truncate instead of overflowing the panel.
-
-## Not For Production Disclosure
-
-The sidebar includes a compact `Not for Production` button below Settings.
-
-Visual treatment:
-
-- Same sidebar row rhythm as the nav buttons.
-- Slight warm/danger tint so it reads as an important disclosure without looking like an error.
-- Info icon plus text label.
-
-Clicking it opens a glass-style modal. The title should be:
-
-```text
-This demonstrator is not intended for Production use
-```
-
-Keep the body concise, with four merged bullets covering browser `localStorage` secrets, lack of access control, visible debugger data, and browser-executed custom tools.
 
 ## URL Hash Navigation
 
