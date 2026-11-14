@@ -13,6 +13,7 @@ services:
       args:
         EXTRAS: core
     image: autochat:local
+    container_name: autochat
     restart: unless-stopped
     env_file: .env
     environment:
@@ -29,39 +30,36 @@ services:
       # AUTOCHAT_PORT changes the host port when 8080 is taken.
       - "${AUTOCHAT_BIND:-127.0.0.1}:${AUTOCHAT_PORT:-8080}:8080"
     depends_on:
-      ollama-pull:
-        condition: service_completed_successfully
+      ollama:
+        condition: service_healthy
 
   # Embeddings only; the chat model runs at OPENAI_API_BASE.
+  # Downloads EMBEDDING_MODEL on first start and reports healthy once it is
+  # ready, so AutoChat starts after it and every container stays running.
   ollama:
     image: ollama/ollama:latest
+    container_name: autochat-ollama
     restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c"]
+    command: ['ollama serve & sleep 2 && ollama pull "$$EMBEDDING_MODEL" && wait']
     environment:
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-nomic-embed-text}
       OLLAMA_MAX_LOADED_MODELS: 1
       OLLAMA_NUM_PARALLEL: 2
       OLLAMA_KEEP_ALIVE: 24h
     volumes:
       - ollama-models:/root/.ollama
     healthcheck:
-      test: ["CMD", "ollama", "list"]
+      test: ["CMD-SHELL", 'ollama show "$$EMBEDDING_MODEL" > /dev/null']
       interval: 10s
       timeout: 5s
       retries: 10
-
-  # One-shot: downloads the embedding model before AutoChat starts.
-  ollama-pull:
-    image: ollama/ollama:latest
-    entrypoint: ["ollama", "pull", "${EMBEDDING_MODEL:-nomic-embed-text}"]
-    environment:
-      OLLAMA_HOST: http://ollama:11434
-    depends_on:
-      ollama:
-        condition: service_healthy
-    restart: "no"
+      start_period: 10m
 
   # Automatic HTTPS for a public domain. DOMAIN must point at this server.
   caddy:
     image: caddy:2
+    container_name: autochat-caddy
     profiles: ["https"]
     restart: unless-stopped
     command: caddy reverse-proxy --from ${DOMAIN:-localhost} --to autochat:8080

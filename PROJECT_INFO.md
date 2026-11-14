@@ -238,12 +238,11 @@ Run them with `make test` (Linux, macOS or WSL).
 
 ### Services in `docker-compose.yml`
 
-| Service | Image | Role | Ports | Starts |
+| Service (container) | Image | Role | Ports | Starts |
 |---|---|---|---|---|
-| `autochat` | `autochat:local`, built from this repo | The API server and UI | `127.0.0.1:8080` → container `8080` (`AUTOCHAT_BIND` changes the host address) | Always; waits for `ollama-pull` to finish |
-| `ollama` | `ollama/ollama:latest` | Runs the embedding model on CPU | none published (internal only) | Always; health-checked with `ollama list` every 10 s |
-| `ollama-pull` | `ollama/ollama:latest` | One-shot job: downloads `EMBEDDING_MODEL` into Ollama, then exits | none | Once `ollama` is healthy |
-| `caddy` | `caddy:2` | Reverse proxy with automatic HTTPS certificates for `DOMAIN` | `80`, `443` | Only with `--profile https` |
+| `autochat` (`autochat`) | `autochat:local`, built from this repo | The API server and UI | `127.0.0.1:8080` → container `8080` (`AUTOCHAT_BIND` / `AUTOCHAT_PORT` change the host side) | Always; waits until `ollama` is healthy |
+| `ollama` (`autochat-ollama`) | `ollama/ollama:latest` | Runs the embedding model on CPU; downloads `EMBEDDING_MODEL` on first start | none published (internal only) | Always; healthy once the model is downloaded (`ollama show`) |
+| `caddy` (`autochat-caddy`) | `caddy:2` | Reverse proxy with automatic HTTPS certificates for `DOMAIN` | `80`, `443` | Only with `--profile https` |
 
 The chat model is **not** a container: it is the hosted API at `OPENAI_API_BASE`.
 
@@ -343,7 +342,7 @@ The UI is at `http://localhost:8080/ui` (or `https://<DOMAIN>/ui`).
 | Symptom | Likely cause |
 |---|---|
 | AutoChat exits at start with `AUTOCHAT_AUTH_SECRET is not set` | `.env` missing the secret |
-| `autochat` waits forever | `ollama-pull` failed: check `docker compose logs ollama-pull` (network, or a wrong `EMBEDDING_MODEL` name) |
+| `autochat` waits forever | The embedding model download failed: check `docker compose logs ollama` (network, or a wrong `EMBEDDING_MODEL` name) |
 | Ingestion errors about vector size | `AUTOCHAT_EMBED_DIM` does not match the embedding model; fix it and re-ingest |
 | Every guest hits the session limit at once | Behind Caddy without `AUTOCHAT_GUEST_TRUST_FORWARDED_FOR=true`, all visitors share Caddy's IP |
 | Guest limits reset unexpectedly | Limits live in memory and reset when the container restarts |

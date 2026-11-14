@@ -178,6 +178,7 @@ async def resolve_artifact_refs(
     known = await _names_by_id(collection, ids, node_store_component)
 
     problems: list[str] = []
+    resolved: dict[str, str] = {}
     for ref in parsed:
         artifact_id = ref.artifact_id.strip()
         in_scope = scope is None or artifact_id in scope
@@ -195,7 +196,12 @@ async def resolve_artifact_refs(
             passed = f"you passed {artifact_id}, which is '{known[artifact_id]}'"
 
         matches = await _ids_by_name(collection, ref.name, scope, node_store_component)
-        if len(matches) == 1:
+        if len(matches) == 1 and artifact_id not in known:
+            # A made-up id with a name that names exactly one file: use that
+            # file instead of bouncing the call back (each retry costs a turn).
+            (match_id, _), *_ = matches.items()
+            resolved[artifact_id] = match_id
+        elif len(matches) == 1:
             (match_id, match_name), *_ = matches.items()
             problems.append(f"'{match_name}' has artifact_id {match_id}; {passed}")
         elif matches:
@@ -216,4 +222,4 @@ async def resolve_artifact_refs(
             + "; ".join(problems)
             + ". Call again with the matching artifact_id."
         )
-    return ids
+    return list(dict.fromkeys(resolved.get(i, i) for i in ids))

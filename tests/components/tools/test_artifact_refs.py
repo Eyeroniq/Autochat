@@ -133,14 +133,23 @@ async def test_ambiguous_name_lists_candidates(store: FakeNodeStore) -> None:
     assert "Pick the one you mean" in message
 
 
-async def test_unknown_id_with_known_name(store: FakeNodeStore) -> None:
+async def test_unknown_id_with_unique_known_name_is_resolved(
+    store: FakeNodeStore,
+) -> None:
+    # A made-up id whose name names exactly one file resolves to that file.
+    ids = await _resolve(
+        [{"name": "2024-Annual-Report.md", "artifact_id": "missing"}], store
+    )
+    assert ids == [REPORT_2024]
+
+
+async def test_unknown_id_with_ambiguous_name_still_rejected(
+    store: FakeNodeStore,
+) -> None:
     with pytest.raises(ValueError) as exc:
-        await _resolve(
-            [{"name": "2024-Annual-Report.md", "artifact_id": "missing"}], store
-        )
+        await _resolve([{"name": "notes.md", "artifact_id": "missing"}], store)
     message = str(exc.value)
-    assert "nothing was searched" in message
-    assert f"'2024-Annual-Report.md' has artifact_id {REPORT_2024}" in message
+    assert "several files are named 'notes.md'" in message
     assert "you passed missing, which matches no file" in message
 
 
