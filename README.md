@@ -1,5 +1,7 @@
 # AutoChat
 
+![AutoChat demo: cited answers from an 88-page book, spreadsheet analysis, SQL, MCP tools and a usage dashboard](docs/assets/autochat-demo.gif)
+
 A self-hosted RAG chat assistant. Upload documents, spreadsheets or a Google Sheet and ask questions about them; answers come back with citations. The API follows the Claude Messages API, so existing clients and SDKs can talk to it unchanged, and any OpenAI-compatible model server can power it.
 
 ```text
